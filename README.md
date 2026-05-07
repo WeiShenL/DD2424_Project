@@ -12,7 +12,7 @@ git add .gitattributes
  Run in terminal:
  ```
  mkdir Data/Data
- cd Data/Data/
+ cd Data
  tar xvfz annotations.tar.gz -C Data/
  tar xvfz images.tar.gz -C Data/
  ```
