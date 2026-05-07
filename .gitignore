@@ -19,7 +19,7 @@ env/
 *.swp
 
 # Project artifacts, datasets
-data/
+data/data/
 results/checkpoints/ 
 results/logs/        
 *.pth                
