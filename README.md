@@ -16,3 +16,9 @@ git add .gitattributes
  tar xvfz annotations.tar.gz -C Data/
  tar xvfz images.tar.gz -C Data/
  ```
+
+# Build splits
+Run once from the repo root:
+```
+python src/data/build_splits.py
+```
