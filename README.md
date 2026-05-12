@@ -24,3 +24,9 @@ to use `torchvision.datasets.ImageFolder` to load imgs.
 ```
 python src/data/build_splits.py
 ```
+
+# Run Phase 1: Binary cat/dog sanity check
+Linear probe on ResNet34 (frozen backbone, new 2-output head). Target ≥99% val accuracy.
+```
+python main.py
+```
