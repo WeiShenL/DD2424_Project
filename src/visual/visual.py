@@ -2,6 +2,7 @@ import torch
 import torchvision
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 
 def imshow(inp, title=None):
@@ -76,4 +77,45 @@ def save_batch_images(dataloader, class_names, save_path, num_images=8):
     imshow(out, title=f"Batch: {', '.join(titles)}")
     plt.savefig(save_path, dpi=150, bbox_inches='tight')
     print(f"Batch image saved to {save_path}")
+    plt.close()
+
+def plot_training_history(history, save_dir="results/Images", filename="training_history.png"):
+    """
+    Plots training and validation accuracy and loss, and saves the plot.
+    
+    Args:
+        history (dict): Dictionary containing 'train_loss', 'val_loss', 'train_acc', 'val_acc' lists.
+        save_dir (str): Directory to save the plot.
+        filename (str): Name of the saved image file.
+    """
+    # Ensure the target directory exists
+    os.makedirs(save_dir, exist_ok=True)
+
+    epochs = range(1, len(history['train_loss']) + 1)
+
+    # Create a figure with two subplots side-by-side
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+    # Plot 1: Loss
+    ax1.plot(epochs, history['train_loss'], label='Train Loss', color='blue', marker='o', markersize=4)
+    ax1.plot(epochs, history['val_loss'], label='Val Loss', color='red', marker='x', markersize=4)
+    ax1.set_title('Training and Validation Loss')
+    ax1.set_xlabel('Epoch')
+    ax1.set_ylabel('Loss')
+    ax1.legend()
+    ax1.grid(True, linestyle='--', alpha=0.6)
+
+    # Plot 2: Accuracy
+    ax2.plot(epochs, history['train_acc'], label='Train Accuracy', color='blue', marker='o', markersize=4)
+    ax2.plot(epochs, history['val_acc'], label='Val Accuracy', color='red', marker='x', markersize=4)
+    ax2.set_title('Training and Validation Accuracy')
+    ax2.set_xlabel('Epoch')
+    ax2.set_ylabel('Accuracy (%)')
+    ax2.legend()
+    ax2.grid(True, linestyle='--', alpha=0.6)
+
+    plt.tight_layout()
+    save_path = os.path.join(save_dir, filename)
+    plt.savefig(save_path, dpi=200, bbox_inches='tight')
+    print(f"\n📈 Training history plot saved to {save_path}")
     plt.close()

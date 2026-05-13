@@ -28,3 +28,5 @@ mlruns/
 
 # Plots 
 *.pkl
+
+results/Images/
