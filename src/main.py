@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+import time
 
 # Import from your new modules
 from models.models import build_model
@@ -40,20 +41,22 @@ def main():
     # 3. Model, Optimizer, Loss
     model = build_model(device, num_classes=2)
     # Adam optimizer
-    optimizer = optim.Adam(model.fc.parameters(), lr=1e-3)
+    # optimizer = optim.Adam(model.fc.parameters(), lr=1e-3)
     # NAG optimizer
-    # optimizer = optim.SGD(model.parameters(), lr=1e-2, momentum=0.9, nesterov=True)
+    optimizer = optim.SGD(model.fc.parameters(), lr=1e-2, momentum=0.9, nesterov=True)
     scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=2)
     criterion = nn.CrossEntropyLoss()
 
     # 4. Training Loop
-    NUM_EPOCHS = 15
+    NUM_EPOCHS = 10
     best_val_acc = 0.0
     checkpoint_dir = "results/checkpoints"
     os.makedirs(checkpoint_dir, exist_ok=True)
     checkpoint = os.path.join(checkpoint_dir, "resnet34_binary_best.pth")
 
     print(f"\nStarting Phase 1, Binary Sanity Check on {device}\n")
+
+    start_time = time.time()
 
     for epoch in range(1, NUM_EPOCHS + 1):
         train_loss, train_acc = run_epoch(model, train_loader, optimizer, criterion, device, training=True)
@@ -72,12 +75,15 @@ def main():
             print(f"  → New best val acc: {best_val_acc:.2f}% .")
 
         print(f"LR: {optimizer.param_groups[0]['lr']:.2e}")
+    
+    end_time = time.time()
 
     # 5. Final Test Evaluation
     print(f"\nTraining complete. Best val acc: {best_val_acc:.2f}%")
     model.load_state_dict(torch.load(checkpoint, map_location=device))
     _, test_acc = run_epoch(model, test_loader, optimizer, criterion, device, training=False)
     print(f"Final Test Accuracy: {test_acc:.2f}%")
+    print(f"Total Training Time: {end_time - start_time:.2f} seconds")
 
 if __name__ == "__main__":
     main()

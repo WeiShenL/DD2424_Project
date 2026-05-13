@@ -9,3 +9,13 @@ def build_model(device, num_classes=2) -> models.ResNet:
     # Replace the final layer
     model.fc = nn.Linear(model.fc.in_features, num_classes)
     return model.to(device)
+
+
+def build_resnet18_model(device, num_classes=2) -> models.ResNet:
+    model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    for param in model.parameters():
+        param.requires_grad = False
+
+    # Replace the final layer
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+    return model.to(device)
