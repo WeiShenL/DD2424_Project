@@ -9,7 +9,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import time
 
 # Import from your new modules
-from models.models import build_model
+from models.models import build_model, build_resnet18_model
 from utils.utils import train_transform, eval_transform, make_binary_target_transform, run_epoch
 from visual.visual import visualize_predictions, save_batch_images, plot_training_history
 
@@ -49,7 +49,7 @@ def binary_classification():
     criterion = nn.CrossEntropyLoss()
 
     # 4. Training Loop
-    NUM_EPOCHS = 10
+    NUM_EPOCHS = 25
     best_val_acc = 0.0
     checkpoint_dir = "results/checkpoints"
     os.makedirs(checkpoint_dir, exist_ok=True)
@@ -58,6 +58,9 @@ def binary_classification():
     print(f"\nStarting Phase 1, Binary Sanity Check on {device}\n")
 
     start_time = time.time()
+    early_stopping_patience = 5
+    epochs_without_improvement = 0
+    early_stop_threshold = 0.01
 
     history = {
         'train_loss': [],
@@ -82,10 +85,18 @@ def binary_classification():
             f"Train Loss: {train_loss:.4f}  Train Acc: {train_acc:.2f}%  |  "
             f"Val Loss: {val_loss:.4f}  Val Acc: {val_acc:.2f}%")
 
-        if val_acc > best_val_acc:
+        if val_acc > best_val_acc + early_stop_threshold:
             best_val_acc = val_acc
+            epochs_without_improvement = 0
             torch.save(model.state_dict(), checkpoint)
             print(f"  → New best val acc: {best_val_acc:.2f}% .")
+        else:
+            epochs_without_improvement += 1
+            print(f"  → No improvement for {epochs_without_improvement} epoch(s).")
+        
+        if epochs_without_improvement >= early_stopping_patience:
+            print(f"\nEarly stopping triggered! No improvement in {early_stopping_patience} epochs.")
+            break # Exit the loop
 
         print(f"LR: {optimizer.param_groups[0]['lr']:.2e}")
     
@@ -123,14 +134,14 @@ def multiclass_classification():
     model = build_model(device, num_classes=37)
     
     # Adam Optimizer
-    optimizer = optim.Adam(model.fc.parameters(), lr=1e-3)
+    optimizer = optim.Adam(model.fc.parameters(), lr=3e-4)
     # We still use NAG and 1e-2 because we are still doing Linear Probing (frozen backbone)
     # optimizer = optim.SGD(model.fc.parameters(), lr=1e-2, momentum=0.9, nesterov=True)
     scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.5, patience=2)
     criterion = nn.CrossEntropyLoss()
 
     # 4. Training Loop
-    NUM_EPOCHS = 25 # Increased slightly because 37 classes is a harder problem
+    NUM_EPOCHS = 25
     best_val_acc = 0.0
     checkpoint_dir = "results/checkpoints"
     os.makedirs(checkpoint_dir, exist_ok=True)
@@ -191,5 +202,5 @@ def multiclass_classification():
     print(f"Total Training Time: {end_time - start_time:.2f} seconds")
 
 if __name__ == "__main__":
-    binary_classification()
+    # binary_classification()
     multiclass_classification()
