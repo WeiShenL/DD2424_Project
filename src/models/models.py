@@ -1,8 +1,12 @@
 import torch.nn as nn
 from torchvision import models
 
-def build_model(device, num_classes=2) -> models.ResNet:
-    model = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
+def build_model(device, num_classes=2, model_type="resnet34") -> models.ResNet:
+    if model_type == "resnet18":
+        model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    else:
+        model = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
+
     for param in model.parameters():
         param.requires_grad = False
 
@@ -10,19 +14,12 @@ def build_model(device, num_classes=2) -> models.ResNet:
     model.fc = nn.Linear(model.fc.in_features, num_classes)
     return model.to(device)
 
+def build_model_finetune(device, num_classes=37, l=1, model_type="resnet34") -> models.ResNet:
+    if model_type == "resnet18":
+        model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    else:
+        model = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
 
-def build_resnet18_model(device, num_classes=2) -> models.ResNet:
-    model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-    for param in model.parameters():
-        param.requires_grad = False
-
-    # Replace the final layer
-    model.fc = nn.Linear(model.fc.in_features, num_classes)
-    return model.to(device)
-
-def build_model_finetune(device, num_classes=37, l=1) -> models.ResNet:
-    model = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
-    
     # Freeze everything first
     for param in model.parameters():
         param.requires_grad = False

@@ -30,3 +30,4 @@ mlruns/
 *.pkl
 
 results/Images/
+results/logs

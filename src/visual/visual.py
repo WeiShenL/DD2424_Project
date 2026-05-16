@@ -80,39 +80,40 @@ def save_batch_images(dataloader, class_names, save_path, num_images=8):
     plt.close()
 
 def plot_training_history(history, save_dir="results/Images", filename="training_history.png"):
-    """
-    Plots training and validation accuracy and loss, and saves the plot.
-    
-    Args:
-        history (dict): Dictionary containing 'train_loss', 'val_loss', 'train_acc', 'val_acc' lists.
-        save_dir (str): Directory to save the plot.
-        filename (str): Name of the saved image file.
-    """
-    # Ensure the target directory exists
     os.makedirs(save_dir, exist_ok=True)
-
     epochs = range(1, len(history['train_loss']) + 1)
 
-    # Create a figure with two subplots side-by-side
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    has_f1 = 'train_f1' in history and len(history['train_f1']) > 0
+    ncols = 3 if has_f1 else 2
+    fig, axes = plt.subplots(1, ncols, figsize=(7 * ncols, 5))
 
-    # Plot 1: Loss
-    ax1.plot(epochs, history['train_loss'], label='Train Loss', color='blue', marker='o', markersize=4)
-    ax1.plot(epochs, history['val_loss'], label='Val Loss', color='red', marker='x', markersize=4)
-    ax1.set_title('Training and Validation Loss')
-    ax1.set_xlabel('Epoch')
-    ax1.set_ylabel('Loss')
-    ax1.legend()
-    ax1.grid(True, linestyle='--', alpha=0.6)
+    # Loss
+    axes[0].plot(epochs, history['train_loss'], label='Train Loss', color='blue', marker='o', markersize=4)
+    axes[0].plot(epochs, history['val_loss'],   label='Val Loss',   color='red',  marker='x', markersize=4)
+    axes[0].set_title('Training and Validation Loss')
+    axes[0].set_xlabel('Epoch')
+    axes[0].set_ylabel('Loss')
+    axes[0].legend()
+    axes[0].grid(True, linestyle='--', alpha=0.6)
 
-    # Plot 2: Accuracy
-    ax2.plot(epochs, history['train_acc'], label='Train Accuracy', color='blue', marker='o', markersize=4)
-    ax2.plot(epochs, history['val_acc'], label='Val Accuracy', color='red', marker='x', markersize=4)
-    ax2.set_title('Training and Validation Accuracy')
-    ax2.set_xlabel('Epoch')
-    ax2.set_ylabel('Accuracy (%)')
-    ax2.legend()
-    ax2.grid(True, linestyle='--', alpha=0.6)
+    # Accuracy
+    axes[1].plot(epochs, history['train_acc'], label='Train Accuracy', color='blue', marker='o', markersize=4)
+    axes[1].plot(epochs, history['val_acc'],   label='Val Accuracy',   color='red',  marker='x', markersize=4)
+    axes[1].set_title('Training and Validation Accuracy')
+    axes[1].set_xlabel('Epoch')
+    axes[1].set_ylabel('Accuracy (%)')
+    axes[1].legend()
+    axes[1].grid(True, linestyle='--', alpha=0.6)
+
+    # F1 (if available)
+    if has_f1:
+        axes[2].plot(epochs, history['train_f1'], label='Train F1', color='blue', marker='o', markersize=4)
+        axes[2].plot(epochs, history['val_f1'],   label='Val F1',   color='red',  marker='x', markersize=4)
+        axes[2].set_title('Training and Validation F1 (Macro)')
+        axes[2].set_xlabel('Epoch')
+        axes[2].set_ylabel('F1 Score')
+        axes[2].legend()
+        axes[2].grid(True, linestyle='--', alpha=0.6)
 
     plt.tight_layout()
     save_path = os.path.join(save_dir, filename)
